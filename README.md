@@ -1,4 +1,4 @@
-# XML Custom Links Extension
+# Mediaclip Library VS Code Extension
 
 A Visual Studio Code extension that enables clickable links in XML files for custom package URLs.
 
@@ -53,21 +53,3 @@ npm run package
 ## Requirements
 
 - Visual Studio Code version 1.60.0 or higher
-
-## Extension Settings
-
-This extension contributes the following settings:
-
-* `xmlCustomLinks.basePath`: Base path for package URLs (optional)
-
-## Known Issues
-
-- None at the moment
-
-## Release Notes
-
-### 0.0.1
-
-Initial release:
-- Basic link detection and navigation
-- Support for package URLs in XML files
