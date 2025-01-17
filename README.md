@@ -32,11 +32,7 @@ Clicking on this URL will open `tests/themes/full-size-photo/theme.xml` in your 
 
 1. Open any XML file in VS Code
 2. URLs matching the pattern `$(package:packageName/path)` will be automatically converted to clickable links
-3. Click the link to open the corresponding theme.xml file
-
-## Commands
-
-- `XML Custom Links: Refresh Links` - Manually refresh the links in the current document
+3. Click the link to open the corresponding xml file
 
 ## Development
 
