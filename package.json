@@ -2,7 +2,7 @@
   "name": "mediaclip-library-vscode",
   "displayName": "mediaclip-library-vscode",
   "description": "",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.96.0"
   },
