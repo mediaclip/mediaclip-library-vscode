@@ -5,10 +5,10 @@ export interface IResourceTypeUtil {
 export class ResourceTypeUtil implements IResourceTypeUtil {
     getResourceTypes() {
         return [
+            "categorization",
             "theme",
             "format",
             "product",
-            "categorization",
             "layout",
             "font",
             "photo",
