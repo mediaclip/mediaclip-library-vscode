@@ -69,10 +69,10 @@ export class LibraryContextUtil implements ILibraryContextUtil {
         if (normalizedDocumentPath.startsWith(normalizedPackagesFolder)) {
             // Get the relative path, removing leading separator if present
             let commonPart = normalizedDocumentPath.substring(normalizedPackagesFolder.length);
-            if (commonPart.startsWith('/')) {
+            if (commonPart.startsWith('/') || commonPart.startsWith('\\')) {
                 commonPart = commonPart.substring(1);
             }
-            let splitParts = commonPart.split('/');
+            let splitParts = commonPart.split(/[/\\]/);
             return {
                 owner: splitParts[0],
                 package: splitParts[1],
