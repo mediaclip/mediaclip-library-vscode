@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.0
+
+- Automatically register xml validation files to highlight errors in xml files.
+
 ## 1.0.0
 
 - Provide link resolution for library resources

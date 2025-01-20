@@ -47,7 +47,7 @@ npm run compile
 npm run watch
 
 # Create VSIX package
-npm run package
+npm run vsix
 ```
 
 ## Requirements
