@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import {DiContainer} from "@mediaclip/dependency-injection";
 import {ExtensionModule} from './extension.module';
+import {LibraryXmlSchemaUtil} from './library-xml-schema-util';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -27,6 +28,10 @@ export function activate(context: vscode.ExtensionContext) {
 		libraryLinkProvider
 	);
 	context.subscriptions.push(jsLinkProvider);
+
+	console.log('Register XML Schemas...');
+	const libraryXmlSchemaUtil = container.resolve(tokens.LibraryXmlSchemaUtil);
+	libraryXmlSchemaUtil.addLibraryCatalogToConfig();
 
 	console.log('Mediaclip Library Extension Activated !');
 }

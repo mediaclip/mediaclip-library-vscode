@@ -92,7 +92,6 @@ export class LibraryContextUtil implements ILibraryContextUtil {
                 });
                 let xmlData = fs.readFileSync(packageXmlPath, {encoding: "utf8"});
                 let packageObj = parser.parse(xmlData);
-                console.log(packageObj);
                 let references = [];
                 if (packageObj.package.references.reference instanceof Array) {
                     references = packageObj.package.references.reference;
@@ -112,7 +111,6 @@ export class LibraryContextUtil implements ILibraryContextUtil {
             console.error('Failed to load referenced packages from ' + packageXmlPath, error);
         }
 
-        console.log(referencedPackages);
         return referencedPackages;
     }
 }

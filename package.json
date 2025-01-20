@@ -15,7 +15,24 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "XML",
+      "properties": {
+        "xml.catalogs": {
+          "type": "array",
+          "default": [],
+          "description": "Array of XML catalog files to use",
+          "items": {
+            "type": "string"
+          },
+          "scope": "window"
+        }
+      }
+    }
   },
+  "extensionDependencies": [
+    "redhat.vscode-xml"
+  ],
   "scripts": {
     "compile": "npm run check-types && node esbuild.cjs",
     "check-types": "tsc --noEmit",
