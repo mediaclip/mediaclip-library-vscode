@@ -3,7 +3,8 @@
   "publisher": "mediaclip",
   "displayName": "Mediaclip Library",
   "description": "",
-  "version": "1.2.1",
+  "version": "1.2.2",
+  "icon": "images/logo.png", 
   "preview": true,
   "engines": {
     "vscode": "^1.96.0"
