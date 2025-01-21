@@ -1,8 +1,10 @@
 {
   "name": "mediaclip-library-vscode",
-  "displayName": "mediaclip-library-vscode",
+  "publisher": "mediaclip",
+  "displayName": "Mediaclip Library",
   "description": "",
-  "version": "1.1.0",
+  "version": "1.2.1",
+  "preview": true,
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -41,7 +43,8 @@
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "vscode:prepublish": "npm run package",
     "package": "npm run check-types && node esbuild.cjs --production",
-    "vsix": "vsce package"
+    "vsix": "vsce package",
+    "publish": "vsce package"
   },
   "dependencies": {
     "@mediaclip/dependency-injection": "^1.0.6",
