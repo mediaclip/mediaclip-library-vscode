@@ -1,30 +1,24 @@
 import * as vscode from 'vscode';
+import {Uri} from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import {LibraryContext} from './library-context';
+import {PackageContext} from './library-context';
 import {IResourceTypeUtil} from './resource-type-util';
-import {ILibraryContextUtil} from './library-context-util';
-import {IResourceIdentityFactory, ResourceIdentityRaw} from './resource-identity-factory';
+import {ILibraryPackageUtil} from './library-package-util';
+import {PackageReferenceActionProvider} from './package-reference-action-provider';
+import {IPackageContextUtil} from './package-context-util';
+import {IResourceUrlResolver, ResourceUrl} from './resource-url-resolver';
 
-
-type ResourceUrl = {
-    owner: string;
-    package: string;
-    path: string;
-    resolvedPath: string;
-    fullPath: string;
-    resourceIdentity: ResourceIdentityRaw
-    isSpecialDefaultPackage?: boolean;
-}
 
 export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
     private readonly urlRegex = /["']\$\((?<package>[^)]+)\)(?<path>[^"']+)["']/g;
 
     constructor(
         private readonly resourceTypeUtil: IResourceTypeUtil,
-        private readonly libraryContextUtil: ILibraryContextUtil,
-        private readonly resourceIdentityFactory: IResourceIdentityFactory,
+        private readonly packageContextUtil: IPackageContextUtil,
+        private readonly resourceUrlResolver: IResourceUrlResolver,
         private readonly diagnosticCollection: vscode.DiagnosticCollection,
+        private readonly libraryPackageUtil: ILibraryPackageUtil,
     ) {
     }
 
@@ -41,8 +35,8 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
         }
 
         let match: RegExpExecArray | null;
-        let libraryContext = this.libraryContextUtil.getLibraryContextOfDocument(document);
-        if (!libraryContext) {
+        let packageContext = this.packageContextUtil.getCurrentPackageContextOfDocument(document);
+        if (!packageContext) {
             return links;
         }
 
@@ -54,12 +48,12 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
                 return links;
             }
 
-            const resourceUrl = this.parsePackageUrl(libraryContext, match);
+            const resourceUrl = this.resourceUrlResolver.resolveResourceUrl(packageContext, match[0]);
             if (!resourceUrl) {
                 continue;
             }
 
-            let targetPath = this.getTargetFile(libraryContext, resourceUrl);
+            let targetPath = this.getTargetFile(packageContext, resourceUrl);
             if (!targetPath) {
                 continue;
             }
@@ -90,16 +84,18 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
                 links.push(link);
 
                 if (!resourceUrl.isSpecialDefaultPackage) {
-                    if (resourceUrl.owner !== libraryContext.currentPackage.owner || resourceUrl.package !== libraryContext.currentPackage.package) {
-                        let referencedPackage = libraryContext.referencedPackages.find(x => x.owner === resourceUrl.owner && x.package === resourceUrl.package);
-                        if (!referencedPackage) {
-                            const diagnostic = new vscode.Diagnostic(
-                                range,
-                                `Referencing a resource from the package '${resourceUrl.owner}/${resourceUrl.package}' but it was not listed in the package.xml file.`,
-                                vscode.DiagnosticSeverity.Warning
-                            );
-                            diagnostics.push(diagnostic);
-                        }
+                    if (!this.libraryPackageUtil.isTargetPackagedReferenced(resourceUrl.owner, resourceUrl.package, packageContext)) {
+                        const diagnostic = new vscode.Diagnostic(
+                            range,
+                            `Referencing a resource from the package '${resourceUrl.owner}/${resourceUrl.package}' but it was not listed in the package.xml file.`,
+                            vscode.DiagnosticSeverity.Warning
+                        );
+                        diagnostic.code = {
+                            value: PackageReferenceActionProvider.PackageMissingReferenceDiagnosticCode,
+                            target: Uri.parse('https://doc.mediaclip.ca/library/packages/package-xml/'),
+                        };
+                        diagnostic.source = 'Mediaclip Library';
+                        diagnostics.push(diagnostic);
                     }
                 }
             }
@@ -112,53 +108,9 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
         return links;
     }
 
-    private parsePackageUrl(
-        libraryContext: LibraryContext,
-        match: RegExpExecArray,
-    ): ResourceUrl | null {
-        try {
-            let owner = '';
-            let packageName = '';
-            let isSpecialDefaultPackage = false;
-            let packageWithOwner = match[1];
-            if (packageWithOwner.startsWith("package:")) {
-                let splitPackage = packageWithOwner.substring("package:".length).split('/', 2);
-                owner = splitPackage[0];
-                packageName = splitPackage[1];
-            } else if (packageWithOwner === "package") {
-                owner = libraryContext.currentPackage.owner;
-                packageName = libraryContext.currentPackage.package;
-            } else if (packageWithOwner === "default-package") {
-                owner = libraryContext.defaultPackage.owner;
-                packageName = "default";
-                isSpecialDefaultPackage = true;
-            }
-
-            let resolvedPath = `/packages/${owner}/${packageName}${match[2]}`;
-            let resourceIdentityResult = this.resourceIdentityFactory.fromPath(resolvedPath);
-            if (!resourceIdentityResult) {
-                console.warn(`Failed to parse: \`${resolvedPath}'`);
-                return null;
-            }
-            console.log(resourceIdentityResult.resourceIdentity);
-
-            return {
-                fullPath: match[0],
-                owner: owner,
-                package: packageName,
-                path: match[2],
-                resolvedPath: resolvedPath,
-                resourceIdentity: resourceIdentityResult.resourceIdentity,
-                isSpecialDefaultPackage: isSpecialDefaultPackage,
-            } as ResourceUrl;
-        } catch (error) {
-            console.error('Error parsing package URL: ' + match[0], error);
-            return null;
-        }
-    }
 
     private getTargetFile(
-        libraryContext: LibraryContext,
+        packageContext: PackageContext,
         resourceUrl: ResourceUrl
     ) {
         let groupKey = resourceUrl.resourceIdentity.groupKey;
@@ -169,7 +121,7 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
         let xmlFile: string = this.resourceTypeUtil.getFilenameForGroupKey(groupKey) + ".xml";
 
         return path.join(
-            libraryContext.packagesFolder,
+            packageContext.libraryContext.packagesFolder,
             resourceUrl.owner,
             resourceUrl.package,
             resourceUrl.path,
