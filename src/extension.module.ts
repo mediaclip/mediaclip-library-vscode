@@ -4,6 +4,7 @@ import vscode from 'vscode';
 import {IResourceTypeUtil, ResourceTypeUtil} from './resource-type-util';
 import {ILibraryContextUtil, LibraryContextUtil} from './library-context-util';
 import {ILibraryXmlSchemaUtil, LibraryXmlSchemaUtil} from './library-xml-schema-util';
+import {IResourceIdentityFactory, ResourceIdentityFactory} from './resource-identity-factory';
 
 const moduleTokens = {
     LibraryLinkDiagnosticCollection: DiToken.create<vscode.DiagnosticCollection>("LibraryLinkDiagnosticCollection"),
@@ -11,6 +12,7 @@ const moduleTokens = {
     ResourceTypeUtil: DiToken.create<IResourceTypeUtil>("ResourceTypeUtil"),
     LibraryContextUtil: DiToken.create<ILibraryContextUtil>("LibraryContextUtil"),
     LibraryXmlSchemaUtil: DiToken.create<ILibraryXmlSchemaUtil>("LibraryXmlSchemaUtil"),
+    ResourceIdentityFactory: DiToken.create<IResourceIdentityFactory>("ResourceIdentityFactory"),
 };
 
 export class ExtensionModule {
@@ -19,6 +21,7 @@ export class ExtensionModule {
             return moduleTokens;
         }
 
+        container.registerSingleton(moduleTokens.ResourceIdentityFactory, new ResourceIdentityFactory());
         container.registerSingleton(moduleTokens.LibraryXmlSchemaUtil, new LibraryXmlSchemaUtil());
         container.registerSingleton(moduleTokens.LibraryContextUtil, new LibraryContextUtil());
         container.registerSingleton(moduleTokens.ResourceTypeUtil, new ResourceTypeUtil());
@@ -26,6 +29,7 @@ export class ExtensionModule {
         container.registerSingleton(moduleTokens.LibraryLinkProvider, c => new LibraryLibraryLinkProvider(
             c.resolve(moduleTokens.ResourceTypeUtil),
             c.resolve(moduleTokens.LibraryContextUtil),
+            c.resolve(moduleTokens.ResourceIdentityFactory),
             c.resolve(moduleTokens.LibraryLinkDiagnosticCollection),
         ));
 

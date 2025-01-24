@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.0
+
+- Improve how `default-package` is handled
+- Reuse same logic as the backend code to parse the resource urls and resolve the file.
+
 ## 1.1.0
 
 - Automatically register xml validation files to highlight errors in xml files.

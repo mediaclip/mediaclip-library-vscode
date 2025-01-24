@@ -3,14 +3,17 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {LibraryContext} from './library-context';
 import {IResourceTypeUtil} from './resource-type-util';
-import {ILibraryContextUtil, LibraryContextUtil} from './library-context-util';
+import {ILibraryContextUtil} from './library-context-util';
+import {IResourceIdentityFactory, ResourceIdentityRaw} from './resource-identity-factory';
 
 
 type ResourceUrl = {
     owner: string;
     package: string;
     path: string;
+    resolvedPath: string;
     fullPath: string;
+    resourceIdentity: ResourceIdentityRaw
     isSpecialDefaultPackage?: boolean;
 }
 
@@ -20,6 +23,7 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
     constructor(
         private readonly resourceTypeUtil: IResourceTypeUtil,
         private readonly libraryContextUtil: ILibraryContextUtil,
+        private readonly resourceIdentityFactory: IResourceIdentityFactory,
         private readonly diagnosticCollection: vscode.DiagnosticCollection,
     ) {
     }
@@ -56,6 +60,9 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
             }
 
             let targetPath = this.getTargetFile(libraryContext, resourceUrl);
+            if (!targetPath) {
+                continue;
+            }
 
             const startIndex = document.getText().indexOf(resourceUrl.fullPath, lastLinkPosition);
             if (startIndex === -1) {
@@ -110,34 +117,40 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
         match: RegExpExecArray,
     ): ResourceUrl | null {
         try {
+            let owner = '';
+            let packageName = '';
+            let isSpecialDefaultPackage = false;
             let packageWithOwner = match[1];
             if (packageWithOwner.startsWith("package:")) {
                 let splitPackage = packageWithOwner.substring("package:".length).split('/', 2);
-                let owner = splitPackage[0];
-                let packageName = splitPackage[1];
-                return {
-                    fullPath: match[0],
-                    owner: owner,
-                    package: packageName,
-                    path: match[2]
-                };
+                owner = splitPackage[0];
+                packageName = splitPackage[1];
             } else if (packageWithOwner === "package") {
-                return {
-                    fullPath: match[0],
-                    owner: libraryContext.currentPackage.owner,
-                    package: libraryContext.currentPackage.package,
-                    path: match[2]
-                };
+                owner = libraryContext.currentPackage.owner;
+                packageName = libraryContext.currentPackage.package;
             } else if (packageWithOwner === "default-package") {
-                return {
-                    fullPath: match[0],
-                    owner: libraryContext.defaultPackage.owner,
-                    package: "default",
-                    isSpecialDefaultPackage: true,
-                    path: match[2]
-                };
+                owner = libraryContext.defaultPackage.owner;
+                packageName = "default";
+                isSpecialDefaultPackage = true;
             }
-            return null;
+
+            let resolvedPath = `/packages/${owner}/${packageName}${match[2]}`;
+            let resourceIdentityResult = this.resourceIdentityFactory.fromPath(resolvedPath);
+            if (!resourceIdentityResult) {
+                console.warn(`Failed to parse: \`${resolvedPath}'`);
+                return null;
+            }
+            console.log(resourceIdentityResult.resourceIdentity);
+
+            return {
+                fullPath: match[0],
+                owner: owner,
+                package: packageName,
+                path: match[2],
+                resolvedPath: resolvedPath,
+                resourceIdentity: resourceIdentityResult.resourceIdentity,
+                isSpecialDefaultPackage: isSpecialDefaultPackage,
+            } as ResourceUrl;
         } catch (error) {
             console.error('Error parsing package URL: ' + match[0], error);
             return null;
@@ -148,13 +161,12 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
         libraryContext: LibraryContext,
         resourceUrl: ResourceUrl
     ) {
-        let xmlFile: string = "";
-        for (let resourceType of this.resourceTypeUtil.getResourceTypes()) {
-            if (resourceUrl.path.includes(resourceType)) {
-                xmlFile = resourceType + ".xml";
-                break;
-            }
+        let groupKey = resourceUrl.resourceIdentity.groupKey;
+        if (!groupKey) {
+            return undefined;
         }
+
+        let xmlFile: string = this.resourceTypeUtil.getFilenameForGroupKey(groupKey) + ".xml";
 
         return path.join(
             libraryContext.packagesFolder,
