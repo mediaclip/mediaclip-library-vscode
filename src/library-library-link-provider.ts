@@ -11,6 +11,7 @@ type ResourceUrl = {
     package: string;
     path: string;
     fullPath: string;
+    isSpecialDefaultPackage?: boolean;
 }
 
 export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
@@ -81,15 +82,17 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
                 link.tooltip = `Open ${targetPath}`;
                 links.push(link);
 
-                if (resourceUrl.owner !== libraryContext.currentPackage.owner || resourceUrl.package !== libraryContext.currentPackage.package) {
-                    let referencedPackage = libraryContext.referencedPackages.find(x => x.owner === resourceUrl.owner && x.package === resourceUrl.package);
-                    if (!referencedPackage) {
-                        const diagnostic = new vscode.Diagnostic(
-                            range,
-                            `Referencing a resource from the package '${resourceUrl.owner}/${resourceUrl.package}' but it was not listed in the package.xml file.`,
-                            vscode.DiagnosticSeverity.Warning
-                        );
-                        diagnostics.push(diagnostic);
+                if (!resourceUrl.isSpecialDefaultPackage) {
+                    if (resourceUrl.owner !== libraryContext.currentPackage.owner || resourceUrl.package !== libraryContext.currentPackage.package) {
+                        let referencedPackage = libraryContext.referencedPackages.find(x => x.owner === resourceUrl.owner && x.package === resourceUrl.package);
+                        if (!referencedPackage) {
+                            const diagnostic = new vscode.Diagnostic(
+                                range,
+                                `Referencing a resource from the package '${resourceUrl.owner}/${resourceUrl.package}' but it was not listed in the package.xml file.`,
+                                vscode.DiagnosticSeverity.Warning
+                            );
+                            diagnostics.push(diagnostic);
+                        }
                     }
                 }
             }
@@ -129,7 +132,8 @@ export class LibraryLibraryLinkProvider implements vscode.DocumentLinkProvider {
                 return {
                     fullPath: match[0],
                     owner: libraryContext.defaultPackage.owner,
-                    package: libraryContext.defaultPackage.package,
+                    package: "default",
+                    isSpecialDefaultPackage: true,
                     path: match[2]
                 };
             }
