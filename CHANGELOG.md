@@ -4,6 +4,7 @@
 
 - Improve how `default-package` is handled
 - Reuse same logic as the backend code to parse the resource urls and resolve the file.
+- Add quickfix to add missing reference in package.xml
 
 ## 1.1.0
 
