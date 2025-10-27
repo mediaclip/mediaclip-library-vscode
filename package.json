@@ -49,20 +49,20 @@
   },
   "dependencies": {
     "@mediaclip/dependency-injection": "^1.0.6",
-    "fast-xml-parser": "^5.2.5"
+    "fast-xml-parser": "^5.3.0"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
-    "@types/vscode": "1.102.0",
-    "@typescript-eslint/eslint-plugin": "8.40.0",
-    "@typescript-eslint/parser": "^8.38.0",
-    "@vscode/test-cli": "^0.0.11",
+    "@types/vscode": "1.105.0",
+    "@typescript-eslint/eslint-plugin": "8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
-    "esbuild": "^0.25.9",
-    "eslint": "^9.33.0",
+    "esbuild": "^0.25.11",
+    "eslint": "^9.38.0",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.9.2",
-    "@vscode/vsce": "^3.6.0"
+    "typescript": "^5.9.3",
+    "@vscode/vsce": "^3.6.2"
   }
 }
