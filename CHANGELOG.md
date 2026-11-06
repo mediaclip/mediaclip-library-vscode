@@ -3,6 +3,7 @@
 ## 1.3.5
 
 - Update dependency packages
+- Update library schema URLs to use schemas.mediaclip.ca
 
 ## 1.3.3
 

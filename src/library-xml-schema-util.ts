@@ -10,12 +10,12 @@ export interface ILibraryXmlSchemaUtil {
 export class LibraryXmlSchemaUtil implements ILibraryXmlSchemaUtil {
     catalog = `<?xml version="1.0"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-    <uri name="Mediaclip.Gifting.Model" uri="https://mc-library-schema.azureedge.net/Gifting.xsd"/>
-    <uri name="Mediaclip.Photobook.Model" uri="https://mc-library-schema.azureedge.net/Photobook.xsd"/>
-    <uri name="Mediaclip.Print.Model" uri="https://mc-library-schema.azureedge.net/Print.xsd"/>
-    <uri name="Mediaclip.Modules.Model" uri="https://mc-library-schema.azureedge.net/Project.xsd"/>
-    <uri name="Mediaclip.Modules.Model.Collage" uri="https://mc-library-schema.azureedge.net/Collage.xsd"/>
-    <uri name="http://www.mediaclip.ca/schema/xml/library" uri="https://mc-library-schema.azureedge.net/Mediaclip.Library.Schema.xsd"/>
+    <uri name="Mediaclip.Gifting.Model" uri="https://schemas.mediaclip.ca/Gifting.xsd"/>
+    <uri name="Mediaclip.Photobook.Model" uri="https://schemas.mediaclip.ca/Photobook.xsd"/>
+    <uri name="Mediaclip.Print.Model" uri="https://schemas.mediaclip.ca/Print.xsd"/>
+    <uri name="Mediaclip.Modules.Model" uri="https://schemas.mediaclip.ca/Project.xsd"/>
+    <uri name="Mediaclip.Modules.Model.Collage" uri="https://schemas.mediaclip.ca/Collage.xsd"/>
+    <uri name="http://www.mediaclip.ca/schema/xml/library" uri="https://schemas.mediaclip.ca/Mediaclip.Library.Schema.xsd"/>
 </catalog>
 `;
 
